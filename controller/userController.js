@@ -62,6 +62,7 @@ export function loginUser(req, res) {
     }
   });
 }
+// check if user is admin
 export function isAdmin(req) {
   if (req.user == null) {
     return false;
