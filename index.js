@@ -4,10 +4,11 @@ import mongoose from "mongoose";
 import userRouter from "./routes/userRouter.js";
 import productRouter from "./routes/productRouter.js";
 import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
 
-// Database connection mongoURI API_KEY
-const mongoURI =
-  "mongodb+srv://admin:1234@cluster0.ifdfckn.mongodb.net/sameera?retryWrites=true&w=majority&appName=Cluster0";
+dotenv.config();
+
+const mongoURI = process.env.MONGO_URL;
 
 // Connect to MongoDB using mongoose
 mongoose
@@ -32,7 +33,7 @@ app.use((req, res, next) => {
     const token = authorizationHeader.replace("Bearer ", "");
 
     // Verify JWT token using secret key
-    jwt.verify(token, "secretKey96$2025", (error, content) => {
+    jwt.verify(token, process.env.JWT_SECRET, (error, content) => {
       if (content == null) {
         // Token is invalid or expired → respond with 401 Unauthorized
         return res.status(401).json({
@@ -55,6 +56,6 @@ app.use("/users", userRouter);
 app.use("/products", productRouter);
 
 // Start the server
-app.listen(5000, () => {
+app.listen(3000, () => {
   console.log("Server is running on port 5000");
 });
