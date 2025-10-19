@@ -1,61 +1,52 @@
 import express from "express";
 import mongoose from "mongoose";
-
 import userRouter from "./routes/userRouter.js";
-import productRouter from "./routes/productRouter.js";
 import jwt from "jsonwebtoken";
+import productRouter from "./routes/productRouter.js";
+import cors from "cors";
 import dotenv from "dotenv";
 
 dotenv.config();
 
 const mongoURI = process.env.MONGO_URL;
 
-// Connect to MongoDB using mongoose
-mongoose
-  .connect(mongoURI)
-  .then(() => {
-    console.log("Connected to MongoDB cluster");
-  })
-  .catch((err) => {
-    console.error("Error connecting to MongoDB:", err);
-  });
+mongoose.connect(mongoURI).then(() => {
+  console.log("Connected to MongoDB Cluster");
+});
 
-// Initialize express application
-let app = express();
+const app = express();
+
+app.use(cors());
 
 app.use(express.json());
 
-// Custom middleware for JWT token verification
 app.use((req, res, next) => {
   const authorizationHeader = req.header("Authorization");
 
   if (authorizationHeader != null) {
     const token = authorizationHeader.replace("Bearer ", "");
 
-    // Verify JWT token using secret key
     jwt.verify(token, process.env.JWT_SECRET, (error, content) => {
       if (content == null) {
-        // Token is invalid or expired → respond with 401 Unauthorized
-        return res.status(401).json({
-          message: "Invalid token",
+        console.log("invalid token");
+
+        res.status(401).json({
+          message: "invalid token",
         });
       } else {
-        // Token is valid → attach decoded payload to req.user
         req.user = content;
+
         next();
       }
     });
   } else {
-    // No Authorization header → skip verification
     next();
   }
 });
 
-// Routes
-app.use("/users", userRouter);
-app.use("/products", productRouter);
+app.use("/api/users", userRouter);
+app.use("/api/products", productRouter);
 
-// Start the server
 app.listen(3000, () => {
-  console.log("Server is running on port 5000");
+  console.log("server is running");
 });

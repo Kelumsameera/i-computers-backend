@@ -1,10 +1,9 @@
-import exprress from "express";
+import express from "express";
 import { createUser, loginUser } from "../controller/userController.js";
 
-const userRouter = exprress.Router();
-// Define user routes here
-userRouter.post("/", createUser);
+const userRouter = express.Router();
 
-userRouter.get("/login", loginUser);
+userRouter.post("/", createUser);
+userRouter.post("/login", loginUser);
 
 export default userRouter;

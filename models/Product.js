@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const productSchema = new mongoose.Schema({
   productID: {
     type: String,
@@ -9,7 +10,7 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
-  altName: {
+  altNames: {
     type: [String],
     default: [],
   },
@@ -33,10 +34,15 @@ const productSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  model: {
+    type: String,
+    required: true,
+    default: "Standard",
+  },
   brand: {
     type: String,
     required: true,
-    default: "No brand",
+    default: "Generic",
   },
   stock: {
     type: Number,
@@ -48,5 +54,7 @@ const productSchema = new mongoose.Schema({
     default: true,
   },
 });
+
 const Product = mongoose.model("Product", productSchema);
+
 export default Product;
