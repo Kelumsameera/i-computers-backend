@@ -1,9 +1,13 @@
 import User from "../models/user.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
+import axios from "axios"; // REQUIRED FOR GOOGLE LOGIN
 import dotenv from "dotenv";
 dotenv.config();
 
+// ------------------------------------------
+// CREATE USER (normal register)
+// ------------------------------------------
 export function createUser(req, res) {
   const data = req.body;
 
@@ -24,55 +28,150 @@ export function createUser(req, res) {
   });
 }
 
+// ------------------------------------------
+// LOGIN WITH EMAIL + PASSWORD
+// ------------------------------------------
 export function loginUser(req, res) {
   const email = req.body.email;
   const password = req.body.password;
 
   User.find({ email: email }).then((users) => {
     if (users[0] == null) {
-      res.json({
+      return res.status(404).json({
         message: "User not found",
       });
+    }
+
+    const user = users[0];
+
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "User is blocked. Contact admin.",
+      });
+    }
+
+    const isPasswordCorrect = bcrypt.compareSync(password, user.password);
+
+    if (isPasswordCorrect) {
+      const payload = {
+        email: user.email,
+        firstName: user.firstName,
+        lastName: user.lastName,
+        role: user.role,
+        isEmailVerified: user.isEmailVerified,
+        image: user.image,
+      };
+
+      const token = jwt.sign(payload, process.env.JWT_SECRET, {
+        expiresIn: "150h",
+      });
+
+      return res.json({
+        message: "Login successful",
+        token: token,
+        role: user.role,
+      });
     } else {
-      const user = users[0];
-
-      const isPasswordCorrect = bcrypt.compareSync(password, user.password);
-
-      if (isPasswordCorrect) {
-        const payload = {
-          email: user.email,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          role: user.role,
-          isEmailVerified: user.isEmailVerified,
-          image: user.image,
-        };
-
-        const token = jwt.sign(payload, process.env.JWT_SECRET, {
-          expiresIn: "150h",
-        });
-
-        res.json({
-          message: "Login successful",
-          token: token,
-          role: user.role,
-        });
-      } else {
-        res.status(401).json({
-          message: "Invalid password",
-        });
-      }
+      return res.status(401).json({
+        message: "Invalid password",
+      });
     }
   });
 }
 
+// ------------------------------------------
+// CHECK ADMIN
+// ------------------------------------------
 export function isAdmin(req) {
-  if (req.user == null) {
-    return false;
-  }
-  if (req.user.role != "admin") {
-    return false;
+  if (!req.user) return false;
+  if (req.user.role !== "admin") return false;
+  return true;
+}
+
+// ------------------------------------------
+// GET CURRENT USER INFO
+// ------------------------------------------
+export function getUser(req, res) {
+  if (!req.user) {
+    return res.status(401).json({
+      message: "Unauthorized",
+    });
   }
 
-  return true;
+  console.log(req.user);
+  res.json(req.user);
+}
+
+// ------------------------------------------
+// GOOGLE LOGIN (FULLY FIXED)
+// ------------------------------------------
+export async function googleLogin(req, res) {
+  console.log("Google Token:", req.body.token);
+
+  try {
+    // Get Google profile
+    const response = await axios.get(
+      "https://www.googleapis.com/oauth2/v3/userinfo",
+      {
+        headers: { Authorization: `Bearer ${req.body.token}` },
+      }
+    );
+
+    const googleData = response.data;
+    console.log("Google User:", googleData);
+
+    let user = await User.findOne({ email: googleData.email });
+
+    // ============================
+    // CASE 1 — USER DOES NOT EXIST
+    // ============================
+    if (!user) {
+      const newUser = new User({
+        email: googleData.email,
+        firstName: googleData.given_name,
+        lastName: googleData.family_name,
+        password: bcrypt.hashSync("google-auth", 10), // safer password
+        role: "user",
+        image: googleData.picture,
+        isEmailVerified: true,
+      });
+
+      user = await newUser.save();
+    }
+
+    // If user is blocked
+    if (user.isBlocked) {
+      return res.status(403).json({
+        message: "User is blocked. Contact admin.",
+      });
+    }
+
+    // JWT Payload
+    const payload = {
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      role: user.role,
+      isEmailVerified: true,
+      image: user.image,
+    };
+
+    // Sign token
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "150h",
+    });
+
+    return res.json({
+      message: "Login successful",
+      token: token,
+      role: user.role,
+    });
+  } catch (error) {
+    console.error("Google Login Error:", error);
+
+    return res.status(500).json({
+      message: "Google login failed",
+      error: error.message,
+    });
+  }
 }
