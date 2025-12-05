@@ -4,6 +4,7 @@ import {
   deleteProduct,
   getAllProducts,
   getProductByID,
+  searchProducts,
   updateProduct,
 } from "../controllers/productController.js";
 
@@ -16,6 +17,8 @@ productRouter.get("/trending", (req, res) => {
 });
 
 productRouter.post("/", createProduct);
+
+productRouter.get("/search/:query", searchProducts);
 
 productRouter.get("/:productID", getProductByID);
 

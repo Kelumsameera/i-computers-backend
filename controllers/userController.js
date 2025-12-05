@@ -251,3 +251,54 @@ export async function validateOTPAndUpdatePassword(req, res) {
 		res.status(500).json({ message: "Internal server error" });
 	} 
 }
+
+export async function getAllUsers(req, res) {
+  if (!isAdmin(req)) {
+    return res.status(403).json({
+      message: "Access denied",
+    });
+  }
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (error) {
+    res.status(500).json({
+      message: "Error fetching users",
+      error: error.message,
+    });
+  }
+}
+
+export async function updateUserStatus(req, res) {
+  if (!isAdmin(req)) {
+    return res.status(403).json({
+      message: "Access denied",
+    });
+  }
+
+  const email = req.params.email; // FIXED
+  const isBlocked = req.body.isBlocked;
+
+  // Prevent admin from blocking themselves
+  if (req.user.email === email) {
+    return res.status(400).json({
+      message: "Admin cannot block/unblock themselves",
+    });
+  }
+
+  try {
+    await User.updateOne(
+      { email: email },
+      { $set: { isBlocked: isBlocked } }
+    );
+
+    res.json({
+      message: "User status updated successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error updating user status",
+      error: error.message,
+    });
+  }
+}
