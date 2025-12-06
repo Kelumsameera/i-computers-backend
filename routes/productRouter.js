@@ -1,6 +1,7 @@
 import express from "express";
 import {
   createProduct,
+  createProductsBulk,
   deleteProduct,
   getAllProducts,
   getProductByID,
@@ -17,6 +18,8 @@ productRouter.get("/trending", (req, res) => {
 });
 
 productRouter.post("/", createProduct);
+productRouter.post("/bulk", createProductsBulk);
+
 
 productRouter.get("/search/:query", searchProducts);
 

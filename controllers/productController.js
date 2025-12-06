@@ -25,6 +25,26 @@ export function createProduct(req, res) {
       });
     });
 }
+export async function createProductsBulk(req, res) {
+  if (!isAdmin(req)) {
+    return res.status(403).json({ message: "Forbidden" });
+  }
+
+  try {
+    // req.body MUST be an array
+    const products = await Product.insertMany(req.body);
+
+    res.json({
+      message: "Bulk products created successfully",
+      count: products.length,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating products",
+      error: error.message,
+    });
+  }
+}
 
 export async function getAllProducts(req, res) {
   console.log("products fetching");
