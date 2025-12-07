@@ -22,6 +22,7 @@ productRouter.get("/search/:query", searchProducts);
 
 productRouter.get("/:productID", getProductByID);
 
+
 productRouter.delete("/:productID", deleteProduct);
 
 productRouter.put("/:productID", updateProduct);
