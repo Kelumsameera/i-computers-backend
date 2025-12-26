@@ -53,6 +53,12 @@ const productSchema = new mongoose.Schema({
     type: Boolean,
     default: true,
   },
+  freeShipping: {
+    type: Boolean,
+    default: false,
+  },
+
+
 });
 
 export default mongoose.models.Product ||
