@@ -1,6 +1,7 @@
 import Product from "../models/product.js";
 import { isAdmin } from "./userController.js";
 
+//CreateProduct handles the creation of a new product
 export function createProduct(req, res) {
   if (!isAdmin(req)) {
     res.status(403).json({
@@ -25,27 +26,7 @@ export function createProduct(req, res) {
       });
     });
 }
-export async function createProductsBulk(req, res) {
-  if (!isAdmin(req)) {
-    return res.status(403).json({ message: "Forbidden" });
-  }
-
-  try {
-    // req.body MUST be an array
-    const products = await Product.insertMany(req.body);
-
-    res.json({
-      message: "Bulk products created successfully",
-      count: products.length,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: "Error creating products",
-      error: error.message,
-    });
-  }
-}
-
+//GET /api/products
 export async function getAllProducts(req, res) {
   console.log("products fetching");
   try {
@@ -85,7 +66,7 @@ export async function getAllProducts(req, res) {
     });
   }
 }
-
+//Delete /api/products/:productID
 export function deleteProduct(req, res) {
   if (!isAdmin(req)) {
     res.status(403).json({
@@ -102,7 +83,7 @@ export function deleteProduct(req, res) {
     });
   });
 }
-
+//Update /api/products/:productID
 export function updateProduct(req, res) {
   if (!isAdmin(req)) {
     res.status(403).json({
@@ -119,7 +100,7 @@ export function updateProduct(req, res) {
     });
   });
 }
-
+//Getproduct by ID /api/products/:productID
 export function getProductByID(req, res) {
   const productID = req.params.productID;
 
@@ -150,7 +131,7 @@ export function getProductByID(req, res) {
       });
     });
 }
-
+//Search products /api/products/search/:query
 export async function searchProducts(req, res) {
   const query = req.params.query;
   try {
@@ -169,4 +150,4 @@ export async function searchProducts(req, res) {
     });
   }
 }
-// add try catch for async-await
+

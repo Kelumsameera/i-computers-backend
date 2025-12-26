@@ -6,6 +6,8 @@ import productRouter from "./routes/productRouter.js";
 import cors from "cors";
 import dotenv from "dotenv";
 import orderRouter from "./routes/orderRouter.js";
+import reviewsRouter from "./routes/reviewsRouter.js";
+import settingsRouter from "./routes/adminSettings.js";
 
 dotenv.config();
 
@@ -45,9 +47,12 @@ app.use((req, res, next) => {
   }
 });
 
+
 app.use("/api/users", userRouter);
 app.use("/api/products", productRouter);
-app.use("/api/orders",orderRouter);
+app.use("/api/reviews", reviewsRouter);
+app.use("/api/orders", orderRouter);
+app.use("/api/settings", settingsRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });
