@@ -1,12 +1,11 @@
 import Review from "../models/reviews.js";
 import { isAdmin } from "./userController.js";
 
-/* -------------------------------------------------------
-   PUBLIC: CREATE NEW REVIEW
-------------------------------------------------------- */
+// CreateReview handles the creation of a new review
 export async function createReview(req, res) {
   try {
-    const { productId, name, rating, title, content, verified } = req.body;
+    const { productId, name, rating, title, content, verified, images } =
+      req.body;
 
     if (!productId || !rating || !title || !content) {
       return res.status(400).json({ message: "Missing required fields" });
@@ -19,6 +18,7 @@ export async function createReview(req, res) {
       title,
       content,
       verified: verified ?? false,
+      images: Array.isArray(images) ? images : [], 
     });
 
     const saved = await review.save();
@@ -37,9 +37,8 @@ export async function createReview(req, res) {
   }
 }
 
-/* -------------------------------------------------------
-   PUBLIC: GET ALL REVIEWS FOR PRODUCT
-------------------------------------------------------- */
+
+// GetAllReviews fetches all non-hidden, non-deleted reviews for a product
 export async function getAllReviews(req, res) {
   try {
     const { productId } = req.params;
@@ -63,9 +62,7 @@ export async function getAllReviews(req, res) {
   }
 }
 
-/* -------------------------------------------------------
-   PUBLIC: VOTE REVIEW (Helpful / Not Helpful)
-------------------------------------------------------- */
+// VoteReview allows users to vote a review as helpful or not helpful
 export async function voteReview(req, res) {
   try {
     const { reviewId } = req.params;
@@ -102,9 +99,7 @@ export async function voteReview(req, res) {
   }
 }
 
-/* -------------------------------------------------------
-   ADMIN: GET ALL REVIEWS (including hidden & deleted)
-------------------------------------------------------- */
+// Admin Get All Reviews
 export async function adminGetAllReviews(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });
@@ -125,10 +120,7 @@ export async function adminGetAllReviews(req, res) {
     });
   }
 }
-
-/* -------------------------------------------------------
-   ADMIN: UPDATE REVIEW CONTENT
-------------------------------------------------------- */
+// Admin Update Review
 export async function adminUpdateReview(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });
@@ -163,9 +155,7 @@ export async function adminUpdateReview(req, res) {
   }
 }
 
-/* -------------------------------------------------------
-   ADMIN: HIDE / UNHIDE REVIEW
-------------------------------------------------------- */
+// Admin Toggle Hidden State of Review
 export async function adminToggleHidden(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });
@@ -197,9 +187,7 @@ export async function adminToggleHidden(req, res) {
   }
 }
 
-/* -------------------------------------------------------
-   ADMIN: SOFT DELETE REVIEW
-------------------------------------------------------- */
+// Admin Toggle Hidden State of Review
 export async function adminDeleteReview(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });
@@ -230,9 +218,7 @@ export async function adminDeleteReview(req, res) {
   }
 }
 
-/* -------------------------------------------------------
-   ADMIN: RESTORE DELETED REVIEW
-------------------------------------------------------- */
+// Admin Restore Review
 export async function adminRestoreReview(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });
@@ -259,6 +245,46 @@ export async function adminRestoreReview(req, res) {
       success: false,
       message: "Error restoring review",
       error: err.message,
+    });
+  }
+}
+// ⭐ Get rating summary for a product
+export async function getProductRating(req, res) {
+  try {
+    const { productId } = req.params;
+
+    const result = await Review.aggregate([
+      {
+        $match: {
+          productId: productId,
+          hidden: false,
+          deleted: false,
+        },
+      },
+      {
+        $group: {
+          _id: "$productId",
+          averageRating: { $avg: "$rating" },
+          reviewCount: { $sum: 1 },
+        },
+      },
+    ]);
+
+    if (result.length === 0) {
+      return res.json({
+        averageRating: 0,
+        reviewCount: 0,
+      });
+    }
+
+    res.json({
+      averageRating: Number(result[0].averageRating.toFixed(1)),
+      reviewCount: result[0].reviewCount,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Failed to get rating",
+      error: error.message,
     });
   }
 }

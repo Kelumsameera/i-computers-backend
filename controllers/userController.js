@@ -18,9 +18,7 @@ const transporter = nodemailer.createTransport({
 	},
 });
 
-// ------------------------------------------
-// CREATE USER (normal register)
-// ------------------------------------------
+
 export function createUser(req, res) {
   const data = req.body;
 
@@ -41,9 +39,7 @@ export function createUser(req, res) {
   });
 }
 
-// ------------------------------------------
-// LOGIN WITH EMAIL + PASSWORD
-// ------------------------------------------
+
 export function loginUser(req, res) {
   const email = req.body.email;
   const password = req.body.password;
@@ -92,18 +88,14 @@ export function loginUser(req, res) {
   });
 }
 
-// ------------------------------------------
-// CHECK ADMIN
-// ------------------------------------------
+
 export function isAdmin(req) {
   if (!req.user) return false;
   if (req.user.role !== "admin") return false;
   return true;
 }
 
-// ------------------------------------------
-// GET CURRENT USER INFO
-// ------------------------------------------
+//Get user profile
 export function getUser(req, res) {
   if (!req.user) {
     return res.status(401).json({
@@ -115,9 +107,7 @@ export function getUser(req, res) {
   res.json(req.user);
 }
 
-// ------------------------------------------
-// GOOGLE LOGIN (FULLY FIXED)
-// ------------------------------------------
+//Google Login
 export async function googleLogin(req, res) {
   console.log("Google Token:", req.body.token);
 
@@ -135,9 +125,7 @@ export async function googleLogin(req, res) {
 
     let user = await User.findOne({ email: googleData.email });
 
-    // ============================
-    // CASE 1 — USER DOES NOT EXIST
-    // ============================
+    // If user doesn't exist
     if (!user) {
       const newUser = new User({
         email: googleData.email,

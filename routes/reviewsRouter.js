@@ -7,21 +7,27 @@ import {
   adminToggleHidden,
   adminDeleteReview,
   adminRestoreReview,
-  adminGetAllReviews
+  adminGetAllReviews,
+  getProductRating,
+
 } from "../controllers/reviewController.js";
 
 const reviewsRouter = express.Router();
 
-// --- ADMIN ROUTES MUST COME FIRST ---
+// admin routes
 reviewsRouter.get("/all", adminGetAllReviews);
 reviewsRouter.patch("/admin/:reviewId", adminUpdateReview);
 reviewsRouter.patch("/admin/:reviewId/toggle-hidden", adminToggleHidden);
 reviewsRouter.delete("/admin/:reviewId", adminDeleteReview);
 reviewsRouter.patch("/admin/:reviewId/restore", adminRestoreReview);
 
-// --- PUBLIC ROUTES ---
+reviewsRouter.get("/rating/:productId", getProductRating);
+// public routes
 reviewsRouter.post("/add", createReview);
-reviewsRouter.get("/:productId", getAllReviews);
+
+// vote review
 reviewsRouter.patch("/:reviewId/vote", voteReview);
+
+reviewsRouter.get("/:productId", getAllReviews);
 
 export default reviewsRouter;

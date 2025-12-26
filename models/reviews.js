@@ -2,28 +2,64 @@ import mongoose from "mongoose";
 
 const reviewSchema = new mongoose.Schema(
   {
-    productId: { type: String, required: true },
+    productId: {
+      type: String,
+      required: true,
+    },
 
-    name: { type: String, default: "Anonymous" },
+    name: {
+      type: String,
+      default: "Anonymous",
+    },
 
-    rating: { type: Number, required: true, min: 1, max: 5 },
+    rating: {
+      type: Number,
+      required: true,
+      min: 1,
+      max: 5,
+    },
 
-    verified: { type: Boolean, default: false },
+    verified: {
+      type: Boolean,
+      default: false,
+    },
 
-    title: { type: String, required: true },
+    title: {
+      type: String,
+      required: true,
+    },
 
-    content: { type: String, required: true },
+    content: {
+      type: String,
+      required: true,
+    },
 
-    helpful: { type: Number, default: 0 },
+    
+    images: {
+      type: [String],
+      default: [],
+    },
 
-    notHelpful: { type: Number, default: 0 },
+    helpful: {
+      type: Number,
+      default: 0,
+    },
 
-    // ⭐ Admin moderation fields
-    hidden: { type: Boolean, default: false },  // admin hide/unhide
-    deleted: { type: Boolean, default: false }, // soft delete
+    notHelpful: {
+      type: Number,
+      default: 0,
+    },
+
+    hidden: {
+      type: Boolean,
+      default: false,
+    },
+
+    deleted: {
+      type: Boolean,
+      default: false,
+    },
   },
-
-  // ⭐ Automatically adds createdAt & updatedAt
   { timestamps: true }
 );
 
