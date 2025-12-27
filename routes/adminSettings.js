@@ -1,5 +1,5 @@
 import express from "express";
-import { getSettings, updateSettings } from "../controllers/adminSettingsController.js.js";
+import { getSettings, updateSettings } from "../controllers/adminSettingsController.js";
 
 
 const settingsRouter = express.Router();
