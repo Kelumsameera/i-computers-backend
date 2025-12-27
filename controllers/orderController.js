@@ -1,6 +1,6 @@
 import Order from "../models/order.js";
 import Product from "../models/product.js";
-import Settings from "../models/Settings.js";
+import Settings from "../models/settings.js";
 import { isAdmin } from "./userController.js";
 
 export async function createOrder(req, res) {
