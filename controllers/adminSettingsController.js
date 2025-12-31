@@ -1,5 +1,5 @@
 import Settings from "../models/Settings.js";
-import { isAdmin } from "./userController.js";
+import { isAdmin } from "../controllers/userController.js";
 
 // GET SETTINGS
 export async function getSettings(req, res) {
