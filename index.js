@@ -8,6 +8,7 @@ import dotenv from "dotenv";
 import orderRouter from "./routes/orderRouter.js";
 import reviewsRouter from "./routes/reviewsRouter.js";
 import settingsRouter from "./routes/adminSettings.js";
+import contactRouter from "./routes/contactRoutes.js";
 
 dotenv.config();
 
@@ -53,6 +54,7 @@ app.use("/api/products", productRouter);
 app.use("/api/reviews", reviewsRouter);
 app.use("/api/orders", orderRouter);
 app.use("/api/settings", settingsRouter);
+app.use("/api/contact", contactRouter);
 
 app.use((req, res) => {
   res.status(404).json({ message: "Not found" });

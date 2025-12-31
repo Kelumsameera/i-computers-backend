@@ -1,7 +1,7 @@
 import Settings from "../models/Settings.js";
-import { isAdmin } from "../controllers/userController.js";
+import { isAdmin } from "./userController.js";
 
-/* GET SETTINGS */
+// GET SETTINGS
 export async function getSettings(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });
@@ -20,7 +20,7 @@ export async function getSettings(req, res) {
   }
 }
 
-/* UPDATE SETTINGS */
+// UPDATE SETTINGS
 export async function updateSettings(req, res) {
   if (!isAdmin(req)) {
     return res.status(403).json({ message: "Access denied" });

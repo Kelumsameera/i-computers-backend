@@ -151,3 +151,33 @@ export async function searchProducts(req, res) {
   }
 }
 
+
+// Bulk create products
+export async function createProductsBulk(req, res) {
+  if (!isAdmin(req)) {
+    return res.status(403).json({
+      message: "Only admin can create products in bulk",
+    });
+  }
+
+  try {
+    const products = req.body;
+
+    if (!Array.isArray(products)) {
+      return res.status(400).json({
+        message: "Invalid data format. Expected an array",
+      });
+    }
+
+    await Product.insertMany(products);
+
+    res.status(201).json({
+      message: "Products created successfully",
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error creating products",
+      error: error.message,
+    });
+  }
+}
