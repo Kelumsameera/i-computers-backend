@@ -2,7 +2,7 @@
 
 Node.js / Express API for the i-Computers web application, with MongoDB (Mongoose), authentication, products, orders, reviews and site settings.
 
-> **Security warning:** Several admin or write endpoints are mounted without route-level role middleware. Do not expose this API to the public internet unchanged. Authentication and authorization must be enforced server-side, independently of the frontend.
+> **Security warning:** Route-level admin guards were introduced for key management endpoints, and public registration no longer accepts privileged roles. This is not a complete authentication or authorization audit; do not deploy publicly without integration testing.
 
 ## Stack
 
@@ -29,14 +29,14 @@ The current server listens on port `3000`. The `start` script is `node index.js`
 | `/api/reviews` | Reviews and moderation |
 | `/api/settings` | Site settings |
 
-Some endpoints are intended only for administrators, **but the current router does not consistently enforce admin roles**. For example product create/update/delete, order status updates, site settings and user management require authorization hardening.
+Product create/update/delete, order list/status management, moderation, settings updates and user administration now have route-level admin guards. The signed JWT currently uses `email` and `role` claims; test all customer/admin workflows and audit other routes for missing permissions.
 
 ## Required security work
 
-1. Add explicit authenticated-user and admin-role middleware to sensitive routes.
-2. Audit registration and Google-login account creation to prevent role escalation.
+1. Integration-test admin guards, signed JWT handling and role-restricted registration.
+2. Audit Google-login account creation and any remaining privilege escalation paths.
 3. Validate payloads, restrict CORS, and rate-limit login and OTP flows.
-4. Avoid exposing password hashes or other private user data in JSON responses.
+4. Review every sensitive response for private user data, even though the admin user list now excludes password hashes.
 5. Review OTP expiry, usage limits and account takeover protections.
 6. Add integration tests for guest, customer and admin access before production deployment.
 
