@@ -1,3 +1,4 @@
+import { requireAdmin } from "../middleware/requireAdmin.js";
 import express from "express";
 import { createUser, getAllUsers, getUser, googleLogin, loginUser, sendOtp, updateUserStatus, validateOTPAndUpdatePassword } from "../controllers/userController.js";
 
@@ -9,8 +10,8 @@ userRouter.get("/", getUser);
 userRouter.post("/google-login", googleLogin);
 userRouter.get("/send-otp/:email", sendOtp);
 userRouter.post("/validate-otp", validateOTPAndUpdatePassword);
-userRouter.get("/all", getAllUsers);
-userRouter.put("/toggle-block/:email", updateUserStatus);
+userRouter.get("/all", requireAdmin, getAllUsers);
+userRouter.put("/toggle-block/:email", requireAdmin, updateUserStatus);
 
 
 export default userRouter;
