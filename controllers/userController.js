@@ -29,7 +29,7 @@ export function createUser(req, res) {
     firstName: data.firstName,
     lastName: data.lastName,
     password: hashedPassword,
-    role: data.role,
+    role: "user",
   });
 
   user.save().then(() => {
@@ -103,13 +103,11 @@ export function getUser(req, res) {
     });
   }
 
-  console.log(req.user);
   res.json(req.user);
 }
 
 //Google Login
 export async function googleLogin(req, res) {
-  console.log("Google Token:", req.body.token);
 
   try {
     // Get Google profile
@@ -247,7 +245,7 @@ export async function getAllUsers(req, res) {
     });
   }
   try {
-    const users = await User.find();
+    const users = await User.find().select("-password");
     res.json(users);
   } catch (error) {
     res.status(500).json({
