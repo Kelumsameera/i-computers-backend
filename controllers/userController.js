@@ -223,7 +223,7 @@ export async function validateOTPAndUpdatePassword(req, res) {
 		const newPassword = req.body.newPassword;
 
 		if (typeof email !== "string" || typeof otp !== "string" ||
-			!/^\\d{6}$/.test(otp) || typeof newPassword !== "string" ||
+			!/^\d{6}$/.test(otp) || typeof newPassword !== "string" ||
 			newPassword.length < 8) {
 			return res.status(400).json({ message: "A valid email, six-digit OTP and password (8+ characters) are required" });
 		}
