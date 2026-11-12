@@ -29,7 +29,7 @@ export function createUser(req, res) {
     firstName: data.firstName,
     lastName: data.lastName,
     password: hashedPassword,
-    role: "user",
+    role: "customer",
   });
 
   user.save().then(() => {
