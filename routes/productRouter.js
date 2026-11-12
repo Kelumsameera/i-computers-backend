@@ -1,3 +1,4 @@
+import { requireAdmin } from "../middleware/requireAdmin.js";
 import express from "express";
 import {
   createProduct,
@@ -16,10 +17,10 @@ productRouter.get("/", getAllProducts);
 productRouter.get("/trending", (req, res) => {
   res.json({ message: "Trending products" });
 });
-productRouter.post("/", createProduct);
+productRouter.post("/", requireAdmin, createProduct);
 productRouter.get("/search/:query", searchProducts);
 productRouter.get("/:productID", getProductByID);
-productRouter.delete("/:productID", deleteProduct);
-productRouter.put("/:productID", updateProduct);
+productRouter.delete("/:productID", requireAdmin, deleteProduct);
+productRouter.put("/:productID", requireAdmin, updateProduct);
 
 export default productRouter;
