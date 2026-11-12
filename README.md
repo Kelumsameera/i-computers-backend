@@ -47,3 +47,15 @@ Product create/update/delete, order list/status management, moderation, settings
 ## Current status
 
 Documentation only. No runtime test, deployment validation or security certification has been performed.
+
+## Exposed MongoDB credentials – incident response
+
+GitHub secret-scanning alerts [#1](https://github.com/Kelumsameera/i-computers-backend/security/secret-scanning/1) and [#2](https://github.com/Kelumsameera/i-computers-backend/security/secret-scanning/2) identified previously committed MongoDB Atlas connection strings. The current `index.js` loads `MONGO_URL` from the environment, but removing secrets from the latest commit **does not revoke exposed credentials or erase Git history**.
+
+1. In MongoDB Atlas, disable/delete the exposed database user or rotate its password immediately. Prefer a new least-privilege application account over an administrative database user.
+2. Replace `MONGO_URL` in every deployed environment and local `.env`; restart and verify services. Never paste new credentials into issues, PRs or chat.
+3. Review Atlas network access restrictions and database activity/audit logs for unexpected access during the exposure window. Treat stored data as potentially compromised until assessed.
+4. After revocation, mark the GitHub secret-scanning alerts as revoked/rotated through GitHub's security UI. Do not mark them as false positives merely because the file was removed.
+5. If historical Git blobs must also be removed, plan a coordinated history rewrite separately: it changes commit IDs and requires all collaborators/deployments to resync. Revocation comes first.
+
+These actions require the Atlas account administrator. This repository change alone does not rotate credentials or resolve the alerts.
