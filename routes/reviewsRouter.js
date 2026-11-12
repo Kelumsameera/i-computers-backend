@@ -1,3 +1,4 @@
+import { requireAdmin } from "../middleware/requireAdmin.js";
 import express from "express";
 import {
   createReview,
@@ -15,11 +16,11 @@ import {
 const reviewsRouter = express.Router();
 
 // admin routes
-reviewsRouter.get("/all", adminGetAllReviews);
-reviewsRouter.patch("/admin/:reviewId", adminUpdateReview);
-reviewsRouter.patch("/admin/:reviewId/toggle-hidden", adminToggleHidden);
-reviewsRouter.delete("/admin/:reviewId", adminDeleteReview);
-reviewsRouter.patch("/admin/:reviewId/restore", adminRestoreReview);
+reviewsRouter.get("/all", requireAdmin, adminGetAllReviews);
+reviewsRouter.patch("/admin/:reviewId", requireAdmin, adminUpdateReview);
+reviewsRouter.patch("/admin/:reviewId/toggle-hidden", requireAdmin, adminToggleHidden);
+reviewsRouter.delete("/admin/:reviewId", requireAdmin, adminDeleteReview);
+reviewsRouter.patch("/admin/:reviewId/restore", requireAdmin, adminRestoreReview);
 
 reviewsRouter.get("/rating/:productId", getProductRating);
 // public routes

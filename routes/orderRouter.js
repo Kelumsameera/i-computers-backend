@@ -1,3 +1,4 @@
+import { requireAdmin } from "../middleware/requireAdmin.js";
 import express from "express";
 import {
   createOrder,
@@ -11,8 +12,8 @@ const orderRouter = express.Router();
 
 orderRouter.post("/preview", previewOrder); 
 orderRouter.post("/", createOrder);
-orderRouter.get("/", getOrders);
+orderRouter.get("/", requireAdmin, getOrders);
 orderRouter.get("/top-selling", getTopSelling);
-orderRouter.put("/:orderId", updateOrderStatus);
+orderRouter.put("/:orderId", requireAdmin, updateOrderStatus);
 
 export default orderRouter;
