@@ -1,4 +1,3 @@
-
 node_modules/
 .env
 npm-debug.log*
@@ -6,3 +5,11 @@ yarn-debug.log*
 yarn-error.log*
 .DS_Store
 Thumbs.db
+.env.*
+!.env.example
+
+# Local keys and backups
+*.pem
+*.key
+*.p12
+.env.backup*
