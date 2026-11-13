@@ -4,6 +4,7 @@ import jwt from "jsonwebtoken";
 import axios from "axios"; // REQUIRED FOR GOOGLE LOGIN
 import dotenv from "dotenv";
 import nodemailer from "nodemailer";
+import { randomInt } from "node:crypto";
 import Otp from "../models/otp.js";
 dotenv.config();
 
@@ -186,11 +187,12 @@ export async function sendOtp(req, res) {
 		 email: email 
 		});
 
-	// generate random 6-digit OTP
-	 const otpCode = Math.floor(100000 + Math.random() * 900000).toString();
+	// Cryptographically random OTP, stored as a hash and valid for ten minutes.
+	const otpCode = randomInt(100000, 1000000).toString();
 	const newOtp = new Otp({
 		email: email,
-		otp: otpCode,
+		otp: await bcrypt.hash(otpCode, 10),
+		expiresAt: new Date(Date.now() + 10 * 60 * 1000),
 	});
 	await newOtp.save();
 	const message ={
@@ -220,17 +222,32 @@ export async function validateOTPAndUpdatePassword(req, res) {
 		const otp = req.body.otp;
 		const newPassword = req.body.newPassword;
 
-		const otpRecord = await Otp.findOne({ email: email, otp: otp });
-		if (otpRecord == null) {
-			res.status(400).json({ message: "Invalid OTP" });
-			return ;
+		if (typeof email !== "string" || typeof otp !== "string" ||
+			!/^\d{6}$/.test(otp) || typeof newPassword !== "string" ||
+			newPassword.length < 8) {
+			return res.status(400).json({ message: "A valid email, six-digit OTP and password (8+ characters) are required" });
 		}
-		const hashedPassword = bcrypt.hashSync(newPassword, 10);
+		const otpRecord = await Otp.findOne({ email });
+		if (!otpRecord || !otpRecord.expiresAt || otpRecord.expiresAt <= new Date() ||
+			otpRecord.attempts >= 5) {
+			return res.status(400).json({ message: "Invalid or expired OTP" });
+		}
+		const valid = await bcrypt.compare(otp, otpRecord.otp);
+		if (!valid) {
+			otpRecord.attempts += 1;
+			if (otpRecord.attempts >= 5) {
+				await Otp.deleteOne({ _id: otpRecord._id });
+			} else {
+				await otpRecord.save();
+			}
+			return res.status(400).json({ message: "Invalid or expired OTP" });
+		}
+		const hashedPassword = await bcrypt.hash(newPassword, 10);
 		await User.updateOne(
-			{ email: email },
-			{ $set: { password: hashedPassword , isEmailVerified: true } }
+			{ email },
+			{ $set: { password: hashedPassword, isEmailVerified: true } }
 		);
-		await Otp.deleteMany({ email: email });
+		await Otp.deleteOne({ _id: otpRecord._id });
 		res.json({ message: "Password updated successfully" });
 	} catch (error) {
 		console.error("Error in validateOTPAndUpdatePassword:", error);
